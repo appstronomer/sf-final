@@ -3,7 +3,7 @@ package mdl
 import (
 	"fmt"
 	"net/http"
-	"sf-check/pkg/output"
+	"sf-gateway/pkg/output"
 	"time"
 )
 

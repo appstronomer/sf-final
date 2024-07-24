@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"sf-check/pkg/mdl"
-	"sf-check/pkg/model"
+	"sf-gateway/pkg/mdl"
+	"sf-gateway/pkg/model"
 	"strconv"
 	"sync"
 

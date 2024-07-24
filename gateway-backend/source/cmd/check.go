@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"sf-check/pkg/api"
-	"sf-check/pkg/mdl"
-	"sf-check/pkg/output"
+	"sf-gateway/pkg/api"
+	"sf-gateway/pkg/mdl"
+	"sf-gateway/pkg/output"
 )
 
 func main() {
