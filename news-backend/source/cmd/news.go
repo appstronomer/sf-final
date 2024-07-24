@@ -48,8 +48,9 @@ func main() {
 
 	// Добавление middleware
 	var router http.Handler = api.Router()
-	router = mdl.WrapWithId(router)
 	router = mdl.WrapWithLogger(router, out)
+	router = mdl.WrapWithId(router)
+	router = mdl.WrapWithPingEcho(router)
 
 	err = http.ListenAndServe(":80", router)
 	if err != nil {

@@ -14,7 +14,7 @@ func WrapWithId(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestId := r.URL.Query().Get("request_id")
 		if requestId == "" {
-			requestId = fmt.Sprintf("chb:%s", uuid.New().String())
+			requestId = fmt.Sprintf("gwb:%s", uuid.New().String())
 		}
 		ctx := context.WithValue(r.Context(), MdlKey("request_id"), requestId)
 		handler.ServeHTTP(w, r.WithContext(ctx))

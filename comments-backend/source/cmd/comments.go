@@ -20,7 +20,7 @@ func main() {
 	out := output.Make(os.Stdout, os.Stderr)
 
 	// Проверка аргументов запуска
-	if len(os.Args) != 1 {
+	if len(os.Args) != 2 {
 		log.Fatalf("ERROR: invalid arguments passed to application: %v\n\nSYNOPSIS\n%v", os.Args, helpMessage)
 	}
 
@@ -36,8 +36,9 @@ func main() {
 
 	// Добавление middleware
 	var router http.Handler = api.Router()
-	router = mdl.WrapWithId(router)
 	router = mdl.WrapWithLogger(router, out)
+	router = mdl.WrapWithId(router)
+	router = mdl.WrapWithPingEcho(router)
 
 	err = http.ListenAndServe(":80", router)
 	if err != nil {

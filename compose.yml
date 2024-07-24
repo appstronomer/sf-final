@@ -12,7 +12,7 @@ services:
           - ./mock-rss-backend/volume.dev/cache:/root/.cache
         healthcheck:
           test: wget --no-verbose --tries=1 --spider http://localhost:80/healthcheck.txt || exit 1
-          interval: 5s
+          interval: 10s
           timeout: 10s
           retries: 5
         working_dir: /app/source
@@ -31,7 +31,7 @@ services:
       - ./news-db/volume.dev/data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "user", "-d", "sf"]
-      interval: 5s
+      interval: 10s
       timeout: 10s
       retries: 5
 
@@ -50,8 +50,8 @@ services:
           news-db:
             condition: service_healthy
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
-      interval: 5s
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
       timeout: 10s
       retries: 5
     working_dir: /app/source
@@ -70,7 +70,7 @@ services:
       - ./comments-db/volume.dev/data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "user", "-d", "sf"]
-      interval: 5s
+      interval: 10s
       timeout: 10s
       retries: 5
 
@@ -88,8 +88,8 @@ services:
           comments-db:
             condition: service_healthy
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
-      interval: 5s
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
       timeout: 10s
       retries: 5
     working_dir: /app/source
@@ -103,12 +103,37 @@ services:
       - ./check-backend/source:/app/source
       - ./check-backend/volume.dev/gohome:/app/volume/go
       - ./check-backend/volume.dev/cache:/root/.cache
-    ports:
-      - 8080:80
+    expose:
+      - 80
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
-      interval: 5s
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
       timeout: 10s
       retries: 5
     working_dir: /app/source
     command: go run cmd/check.go 
+
+  gateway-backend:
+    image: golang:1.21.4-alpine3.18
+    environment:
+      - GOPATH=/app/volume/go
+    volumes:
+      - ./gateway-backend/source:/app/source
+      - ./gateway-backend/volume.dev/gohome:/app/volume/go
+      - ./gateway-backend/volume.dev/cache:/root/.cache
+    ports:
+      - 8080:80
+    depends_on:
+          news-backend:
+            condition: service_healthy
+          comments-backend:
+            condition: service_healthy
+          check-backend:
+            condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    working_dir: /app/source
+    command: go run cmd/gateway.go
