@@ -44,8 +44,8 @@ func (a *API) handleCheckComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if checker.CheckIfIncorrect(c) {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(http.StatusOK)
 }

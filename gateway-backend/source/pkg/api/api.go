@@ -199,7 +199,9 @@ func (a *API) handleNewsById(w http.ResponseWriter, r *http.Request) {
 
 	// Интерпретация результатов
 	var result model.NewsComplex
+	i := 2
 	for item := range ch {
+		i -= 1
 		switch itemConc := item.(type) {
 		case model.NewsFullDetailed:
 			result.Data = itemConc
@@ -209,8 +211,11 @@ func (a *API) handleNewsById(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, itemConc.Error(), http.StatusInternalServerError)
 			return
 		default:
-			http.Error(w, "unexected result", http.StatusInternalServerError)
+			http.Error(w, "unexected internal result", http.StatusInternalServerError)
 			return
+		}
+		if i == 0 {
+			break
 		}
 	}
 
@@ -236,22 +241,6 @@ func (a *API) handleNewsLatest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// TODO: удалить после тестов
-	// pageParam := r.URL.Query().Get("page")
-	// var page int
-	// var err error
-	// if pageParam != "" {
-	// 	page, err = strconv.Atoi(pageParam)
-	// 	if err != nil {
-	// 		http.Error(w, err.Error(), http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	if page <= 0 {
-	// 		http.Error(w, "positive page number required", http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	query.Add("page", strconv.Itoa(page))
-	// }
 
 	// Добалвение опциональной строки поиска
 	search := r.URL.Query().Get("search")
@@ -300,7 +289,18 @@ func getNewsItem(wg *sync.WaitGroup, ch chan<- interface{}, newsId int, queryNew
 		return
 	}
 	defer res.Body.Close()
-	ch <- res
+	newsItemBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		ch <- err
+		return
+	}
+	var newsItem model.NewsFullDetailed
+	err = json.Unmarshal(newsItemBytes, &newsItem)
+	if err != nil {
+		ch <- err
+		return
+	}
+	ch <- newsItem
 }
 
 func getComments(wg *sync.WaitGroup, ch chan<- interface{}, newsId int, queryComments url.Values) {
@@ -311,7 +311,18 @@ func getComments(wg *sync.WaitGroup, ch chan<- interface{}, newsId int, queryCom
 		return
 	}
 	defer res.Body.Close()
-	ch <- res
+	commentsBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		ch <- err
+		return
+	}
+	var comments []model.Comment
+	err = json.Unmarshal(commentsBytes, &comments)
+	if err != nil {
+		ch <- err
+		return
+	}
+	ch <- comments
 }
 
 func addQueryIntParam(r *http.Request, query url.Values, upParamName, downParamName string) error {
@@ -324,7 +335,7 @@ func addQueryIntParam(r *http.Request, query url.Values, upParamName, downParamN
 			return err
 		}
 		if val <= 0 {
-			return err
+			return fmt.Errorf("%s query param should be greater than 0; received %d", upParamName, val)
 		}
 		query.Add(downParamName, strconv.Itoa(val))
 	}
