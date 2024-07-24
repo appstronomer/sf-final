@@ -1,0 +1,7 @@
+{
+   "rss":[
+      "http://rss.mock/source-first.xml",
+      "http://rss.mock/source-second.xml"
+   ],
+   "request_period": 2
+}

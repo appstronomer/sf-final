@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title><![CDATA[Channel title]]></title>
+        <link>https://fake-site.com/news/</link>
+        <description><![CDATA[Channel description]]></description>
+        <language>ru</language>
+        <managingEditor>editor@fake-site.com</managingEditor>
+        <generator>fake-site.com</generator>
+        <pubDate>Fri, 31 May 2024 08:17:21 GMT</pubDate>
+
+        <image>
+            <link>https://fake-site.com/ru/</link>
+            <url>https://fake-storage.org/123.png</url>
+            <title>Image title</title>
+        </image>
+
+        <item>
+            <title><![CDATA[Article 1]]></title>
+            <guid isPermaLink="true">https://fake-site.com/news/1</guid>
+            <link>https://fake-site.com/news/1?utm_medium=rss</link>
+            <description><![CDATA[<p>Article 1 first paragraph</p><p>Article 1 second paragraph</p>]]></description>
+            <pubDate>Thu, 30 May 2024 11:31:00 GMT</pubDate>
+            <dc:creator><![CDATA[creator1-login]]></dc:creator>
+            <category><![CDATA[cat-a]]></category>
+        </item>
+
+        <item>
+            <title><![CDATA[Article 2]]></title>
+            <guid isPermaLink="true">https://fake-site.com/news/2</guid>
+            <link>https://fake-site.com/news/2?utm_medium=rss</link>
+            <description><![CDATA[<p>Article 2 first paragraph</p><p>Article 2 second paragraph</p>]]></description>
+            <pubDate>Tue, 30 Apr 2024 00:00:00 +0000</pubDate>
+            <dc:creator><![CDATA[creator2-login]]></dc:creator>
+            <category><![CDATA[cat-a]]></category>
+            <category><![CDATA[cat-b]]></category>
+        </item>
+
+    </channel>
+</rss>
