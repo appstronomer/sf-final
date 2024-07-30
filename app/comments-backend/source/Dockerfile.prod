@@ -2,10 +2,12 @@
 FROM golang:1.21.4-alpine3.18 as builder
 WORKDIR /source
 COPY . .
-RUN go build -o /run cmd/main.go
+RUN mkdir /dest
+RUN go build -o /dest/main cmd/main.go
 
 # Этап подготовки и запуска
 FROM alpine:3.18.2
+LABEL project=sf-final
 WORKDIR /app
-COPY --from=builder /run /app/run
-ENTRYPOINT ["/app/run"]
+COPY --from=builder /dest/main /app/main
+ENTRYPOINT ["/app/main"]

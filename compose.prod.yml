@@ -24,6 +24,8 @@ services:
     build: 
       context: ./app/news-backend/source
       dockerfile: Dockerfile.prod
+    volumes:
+      - ./app/news-backend/config.prod:/app/config:ro
     expose:
       - 80
     depends_on:
