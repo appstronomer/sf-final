@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+
+  news-db:
+    image: postgres:16.2-alpine3.19
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=sf
+    volumes:
+      - ./app/news-db/source:/docker-entrypoint-initdb.d:ro
+      - ./app/news-db/volume.prod/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "user", "-d", "sf"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+
+  news-backend:
+    build: 
+      context: ./app/news-backend/source
+      dockerfile: Dockerfile.prod
+    expose:
+      - 80
+    depends_on:
+          news-db:
+            condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    command: /app/config/config.json postgres://user:password@news-db:5432/sf
+
+
+  comments-db:
+    image: postgres:16.2-alpine3.19
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=sf
+    volumes:
+      - ./app/comments-db/source:/docker-entrypoint-initdb.d:ro
+      - ./app/comments-db/volume.prod/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "user", "-d", "sf"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+
+  comments-backend:
+    build: 
+      context: ./app/comments-backend/source
+      dockerfile: Dockerfile.prod
+    expose:
+      - 80
+    depends_on:
+          comments-db:
+            condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    command: postgres://user:password@comments-db:5432/sf
+
+
+  check-backend:
+    build: 
+      context: ./app/check-backend/source
+      dockerfile: Dockerfile.prod
+    expose:
+      - 80
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+
+  gateway-backend:
+    build: 
+      context: ./app/gateway-backend/source
+      dockerfile: Dockerfile.prod
+    ports:
+      - 8080:80
+    depends_on:
+          news-backend:
+            condition: service_healthy
+          comments-backend:
+            condition: service_healthy
+          check-backend:
+            condition: service_healthy
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ping-echo || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 5

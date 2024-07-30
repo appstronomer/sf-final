@@ -7,9 +7,9 @@ services:
         expose:
           - 80
         volumes:
-          - ./mock-rss-backend/source:/app/source
-          - ./mock-rss-backend/config.dev/www:/app/config/www
-          - ./mock-rss-backend/volume.dev/cache:/root/.cache
+          - ./aux/mock-rss-backend/source:/app/source
+          - ./aux/mock-rss-backend/config.dev/www:/app/config/www
+          - ./aux/mock-rss-backend/volume.dev/cache:/root/.cache
         healthcheck:
           test: wget --no-verbose --tries=1 --spider http://localhost:80/healthcheck.txt || exit 1
           interval: 10s
@@ -17,6 +17,7 @@ services:
           retries: 5
         working_dir: /app/source
         command: go run main.go /app/config/www
+
 
   news-db:
     image: postgres:16.2-alpine3.19
@@ -27,23 +28,24 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=sf
     volumes:
-      - ./news-db/source:/docker-entrypoint-initdb.d:ro
-      - ./news-db/volume.dev/data:/var/lib/postgresql/data
+      - ./app/news-db/source:/docker-entrypoint-initdb.d:ro
+      - ./app/news-db/volume.dev/data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "user", "-d", "sf"]
       interval: 10s
       timeout: 10s
       retries: 5
 
+
   news-backend:
     image: golang:1.21.4-alpine3.18
     environment:
       - GOPATH=/app/volume/go
     volumes:
-      - ./news-backend/source:/app/source
-      - ./news-backend/config.dev:/app/config:ro
-      - ./news-backend/volume.dev/gohome:/app/volume/go
-      - ./news-backend/volume.dev/cache:/root/.cache
+      - ./app/news-backend/source:/app/source
+      - ./app/news-backend/config.dev:/app/config:ro
+      - ./app/news-backend/volume.dev/gohome:/app/volume/go
+      - ./app/news-backend/volume.dev/cache:/root/.cache
     expose:
       - 80
     depends_on:
@@ -55,7 +57,8 @@ services:
       timeout: 10s
       retries: 5
     working_dir: /app/source
-    command: go run cmd/news.go /app/config/config.json postgres://user:password@news-db:5432/sf
+    command: go run cmd/main.go /app/config/config.json postgres://user:password@news-db:5432/sf
+
 
   comments-db:
     image: postgres:16.2-alpine3.19
@@ -66,22 +69,23 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=sf
     volumes:
-      - ./comments-db/source:/docker-entrypoint-initdb.d:ro
-      - ./comments-db/volume.dev/data:/var/lib/postgresql/data
+      - ./app/comments-db/source:/docker-entrypoint-initdb.d:ro
+      - ./app/comments-db/volume.dev/data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "user", "-d", "sf"]
       interval: 10s
       timeout: 10s
       retries: 5
 
+
   comments-backend:
     image: golang:1.21.4-alpine3.18
     environment:
       - GOPATH=/app/volume/go
     volumes:
-      - ./comments-backend/source:/app/source
-      - ./comments-backend/volume.dev/gohome:/app/volume/go
-      - ./comments-backend/volume.dev/cache:/root/.cache
+      - ./app/comments-backend/source:/app/source
+      - ./app/comments-backend/volume.dev/gohome:/app/volume/go
+      - ./app/comments-backend/volume.dev/cache:/root/.cache
     expose:
       - 80
     depends_on:
@@ -93,16 +97,17 @@ services:
       timeout: 10s
       retries: 5
     working_dir: /app/source
-    command: go run cmd/comments.go postgres://user:password@comments-db:5432/sf
+    command: go run cmd/main.go postgres://user:password@comments-db:5432/sf
+
 
   check-backend:
     image: golang:1.21.4-alpine3.18
     environment:
       - GOPATH=/app/volume/go
     volumes:
-      - ./check-backend/source:/app/source
-      - ./check-backend/volume.dev/gohome:/app/volume/go
-      - ./check-backend/volume.dev/cache:/root/.cache
+      - ./app/check-backend/source:/app/source
+      - ./app/check-backend/volume.dev/gohome:/app/volume/go
+      - ./app/check-backend/volume.dev/cache:/root/.cache
     expose:
       - 80
     healthcheck:
@@ -111,16 +116,17 @@ services:
       timeout: 10s
       retries: 5
     working_dir: /app/source
-    command: go run cmd/check.go 
+    command: go run cmd/main.go 
+
 
   gateway-backend:
     image: golang:1.21.4-alpine3.18
     environment:
       - GOPATH=/app/volume/go
     volumes:
-      - ./gateway-backend/source:/app/source
-      - ./gateway-backend/volume.dev/gohome:/app/volume/go
-      - ./gateway-backend/volume.dev/cache:/root/.cache
+      - ./app/gateway-backend/source:/app/source
+      - ./app/gateway-backend/volume.dev/gohome:/app/volume/go
+      - ./app/gateway-backend/volume.dev/cache:/root/.cache
     ports:
       - 8080:80
     depends_on:
@@ -136,4 +142,4 @@ services:
       timeout: 10s
       retries: 5
     working_dir: /app/source
-    command: go run cmd/gateway.go
+    command: go run cmd/main.go

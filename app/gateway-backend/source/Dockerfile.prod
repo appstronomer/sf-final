@@ -1,0 +1,11 @@
+# Этап сборки приложения
+FROM golang:1.21.4-alpine3.18 as builder
+WORKDIR /source
+COPY . .
+RUN go build -o /run cmd/main.go
+
+# Этап подготовки и запуска
+FROM alpine:3.18.2
+WORKDIR /app
+COPY --from=builder /run /app/run
+ENTRYPOINT ["/app/run"]
